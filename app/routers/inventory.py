@@ -49,7 +49,7 @@ def read_record_list(previousFactoryCode: str = "", productFactoryCode: str = ""
 
 # Route for creating new records
 @router.post("/record")
-def create_record_list(koujyou_react: KoujyouReact):
+def create_record(koujyou_react: KoujyouReact):
 
     # transform params to Python Standards
     koujyou = map_frontend_to_db(koujyou_react)
@@ -102,6 +102,76 @@ def create_record_list(koujyou_react: KoujyouReact):
         cur.close()
         conn.close()
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=None)
+
+# Function for updating Records
+@router.put("/record")
+def update_record(koujyou_react: KoujyouReact):
+
+    # transform params to Python Standards
+    koujyou = map_frontend_to_db(koujyou_react)
+    # print(koujyou.__dict__)
+
+    conn = db_connection.get_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
+    
+    try:
+        cur.execute("""UPDATE m_koujyou SET 
+            company_code = %s,
+            previous_factory_code = %s,
+            product_factory_code = %s,
+            start_operation_date = %s,
+            end_operation_date = %s,
+            previous_factory_name = %s,
+            product_factory_name = %s,
+            material_department_code = %s,
+            environmental_information = %s,
+            authentication_flag = %s,
+            group_corporate_code = %s,
+            integration_pattern = %s,
+            hulftid = %s
+        WHERE
+            company_code = %s AND
+            previous_factory_code = %s AND
+            product_factory_code = %s AND
+            start_operation_date = %s AND
+            end_operation_date = %s """, 
+        
+        (
+            koujyou.company_code,
+            koujyou.previous_factory_code,
+            koujyou.product_factory_code,
+            koujyou.start_operation_date,
+            koujyou.end_operation_date,
+            koujyou.previous_factory_name,
+            koujyou.product_factory_name,
+            koujyou.material_department_code,
+            koujyou.environmental_information,
+            koujyou.authentication_flag,
+            koujyou.group_corporate_code,
+            koujyou.integration_pattern,
+            koujyou.hulftid,
+
+            # Add fields again for WHERE clause
+            koujyou.company_code,
+            koujyou.previous_factory_code,
+            koujyou.product_factory_code,
+            koujyou.start_operation_date,
+            koujyou.end_operation_date,
+        ))
+        conn.commit()
+        print("Transaction Saved!");
+        # close connection
+        cur.close()
+        conn.close()
+        return JSONResponse(status_code=status.HTTP_200_OK, content=koujyou.__dict__)
+
+    except Exception as e:
+        print("Error: %s", (e));
+        cur.close()
+        conn.close()
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=None)
+
+
 
 # function for map the DB data to frontend data structure
 def map_db_array(db_data):

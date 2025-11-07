@@ -6,14 +6,14 @@ class KoujyouReact(BaseModel):
   productFactoryCode: str
   startOperationDate: str
   endOperationDate: str
-  previousFactoryName: str
-  productFactoryName: str
-  materialDepartmentCode: str
-  environmentalInformation: str
-  authenticationFlag: str
-  groupCorporateCode: str
-  integrationPattern: str
-  hulftid: str
+  previousFactoryName: str = ""
+  productFactoryName: str = ""
+  materialDepartmentCode: str = ""
+  environmentalInformation: str = ""
+  authenticationFlag: str = ""
+  groupCorporateCode: str = ""
+  integrationPattern: str = ""
+  hulftid: str = ""
 
 class Koujyou():
   company_code: str
