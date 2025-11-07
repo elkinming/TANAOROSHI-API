@@ -1,8 +1,10 @@
 import psycopg2
 import psycopg2.extras
 
-from fastapi import APIRouter
+from fastapi import APIRouter, status
+from fastapi.responses import JSONResponse
 from db import db_connection
+from models.koujyou import KoujyouReact, Koujyou
 
 router = APIRouter(
     prefix="/inventory",
@@ -43,6 +45,63 @@ def read_record_list(previousFactoryCode: str = "", productFactoryCode: str = ""
     cur.close()
     conn.close()
     return response
+    
+
+# Route for creating new records
+@router.post("/record")
+def create_record_list(koujyou_react: KoujyouReact):
+
+    # transform params to Python Standards
+    koujyou = map_frontend_to_db(koujyou_react)
+    # print(koujyou.__dict__)
+
+    conn = db_connection.get_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
+    
+    try:
+        cur.execute("""INSERT INTO m_koujyou 
+        (
+            company_code,
+            previous_factory_code,
+            product_factory_code,
+            start_operation_date,
+            end_operation_date,
+            previous_factory_name,
+            product_factory_name,
+            material_department_code,
+            environmental_information,
+            authentication_flag,
+            group_corporate_code,
+            integration_pattern,
+            hulftid
+        ) 
+        VALUES ( %s , %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
+            koujyou.company_code,
+            koujyou.previous_factory_code,
+            koujyou.product_factory_code,
+            koujyou.start_operation_date,
+            koujyou.end_operation_date,
+            koujyou.previous_factory_name,
+            koujyou.product_factory_name,
+            koujyou.material_department_code,
+            koujyou.environmental_information,
+            koujyou.authentication_flag,
+            koujyou.group_corporate_code,
+            koujyou.integration_pattern,
+            koujyou.hulftid
+        ))
+        conn.commit()
+        print("Transaction Saved!");
+        # close connection
+        cur.close()
+        conn.close()
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=koujyou.__dict__)
+
+    except Exception as e:
+        print("Error: %s", (e));
+        cur.close()
+        conn.close()
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=None)
 
 # function for map the DB data to frontend data structure
 def map_db_array(db_data):
@@ -64,3 +123,22 @@ def map_db_array(db_data):
         } for a,b,c,d,e,f,g,h,i,j,k,l,m in db_data]
     
     return response_mapped
+
+
+def map_frontend_to_db(frontend_data: KoujyouReact):
+    mapped_obj = Koujyou()
+    mapped_obj.company_code = frontend_data.companyCode
+    mapped_obj.previous_factory_code = frontend_data.previousFactoryCode
+    mapped_obj.product_factory_code = frontend_data.productFactoryCode
+    mapped_obj.start_operation_date = frontend_data.startOperationDate
+    mapped_obj.end_operation_date = frontend_data.endOperationDate
+    mapped_obj.previous_factory_name = frontend_data.previousFactoryName
+    mapped_obj.product_factory_name = frontend_data.productFactoryName
+    mapped_obj.material_department_code = frontend_data.materialDepartmentCode
+    mapped_obj.environmental_information = frontend_data.environmentalInformation
+    mapped_obj.authentication_flag = frontend_data.authenticationFlag
+    mapped_obj.group_corporate_code = frontend_data.groupCorporateCode
+    mapped_obj.integration_pattern = frontend_data.integrationPattern
+    mapped_obj.hulftid = frontend_data.hulftid
+
+    return mapped_obj
