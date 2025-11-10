@@ -2,8 +2,8 @@ from pydantic import BaseModel
 
 class KoujyouReact(BaseModel):
   companyCode: str
-  previousFactoryCode: str
-  productFactoryCode: str
+  previousFactoryCode: str | int
+  productFactoryCode: str | int
   startOperationDate: str
   endOperationDate: str
   previousFactoryName: str = ""

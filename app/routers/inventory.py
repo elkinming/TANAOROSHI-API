@@ -6,6 +6,8 @@ from fastapi.responses import JSONResponse
 from db import db_connection
 from models.koujyou import KoujyouReact, Koujyou
 
+import uuid
+
 router = APIRouter(
     prefix="/inventory",
     tags=["Inventory"]
@@ -25,7 +27,9 @@ def read_record_list(previousFactoryCode: str = "", productFactoryCode: str = ""
     # Query to Execute
     like_pattern_a= f"%{previous_factory_code}%"
     like_pattern_b = f"%{product_factory_code}%"
-    cur.execute("SELECT * from m_koujyou WHERE previous_factory_code LIKE %s AND product_factory_code LIKE %s ;", (
+    cur.execute("""SELECT * from m_koujyou 
+                    WHERE previous_factory_code LIKE %s AND product_factory_code LIKE %s 
+                    ORDER BY company_code, previous_factory_code, product_factory_code, start_operation_date, end_operation_date;""", (
         like_pattern_a,
         like_pattern_b
     ))
@@ -220,6 +224,7 @@ def insert_batch_record(koujyou_react_array: list[KoujyouReact]):
 def map_db_array(db_data):
 
     response_mapped = [{
+        "key": uuid.uuid4(),
         "companyCode": a, 
         "previousFactoryCode": b,
         "productFactoryCode": c,
