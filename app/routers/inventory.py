@@ -61,18 +61,9 @@ def create_record(koujyou_react: KoujyouReact):
     try:
         cur.execute("""INSERT INTO m_koujyou 
         (
-            company_code,
-            previous_factory_code,
-            product_factory_code,
-            start_operation_date,
-            end_operation_date,
-            previous_factory_name,
-            product_factory_name,
-            material_department_code,
-            environmental_information,
-            authentication_flag,
-            group_corporate_code,
-            integration_pattern,
+            company_code, previous_factory_code, product_factory_code, start_operation_date,
+            end_operation_date, previous_factory_name, product_factory_name, material_department_code,
+            environmental_information, authentication_flag, group_corporate_code, integration_pattern,
             hulftid
         ) 
         VALUES ( %s , %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
@@ -171,6 +162,58 @@ def update_record(koujyou_react: KoujyouReact):
         conn.close()
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=None)
 
+# Route for inserting batch of new records
+@router.post("/record-batch")
+def insert_batch_record(koujyou_react_array: list[KoujyouReact]):
+
+    # transform params to Python Standards
+    koujyou_array = map_frontend_arr_to_db(koujyou_react_array)
+
+    conn = db_connection.get_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
+    
+    try:
+        for koujyou in koujyou_array:
+
+            cur.execute("""INSERT INTO m_koujyou 
+            (
+                company_code, previous_factory_code, product_factory_code, start_operation_date,
+                end_operation_date, previous_factory_name, product_factory_name, material_department_code,
+                environmental_information, authentication_flag, group_corporate_code,
+                integration_pattern, hulftid
+            ) 
+            VALUES ( %s , %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
+                koujyou.company_code,
+                koujyou.previous_factory_code,
+                koujyou.product_factory_code,
+                koujyou.start_operation_date,
+                koujyou.end_operation_date,
+                koujyou.previous_factory_name,
+                koujyou.product_factory_name,
+                koujyou.material_department_code,
+                koujyou.environmental_information,
+                koujyou.authentication_flag,
+                koujyou.group_corporate_code,
+                koujyou.integration_pattern,
+                koujyou.hulftid
+            ))
+        conn.commit()
+        print("Transaction Saved!");
+        # close connection
+        cur.close()
+        conn.close()
+
+        # Transform data in JSON
+        response = [koujyou.__dict__ for koujyou in koujyou_array]
+        
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
+
+    except Exception as e:
+        print("Error: %s", (e));
+        cur.close()
+        conn.close()
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=None)
+
 
 
 # function for map the DB data to frontend data structure
@@ -194,7 +237,7 @@ def map_db_array(db_data):
     
     return response_mapped
 
-
+# function for map the Frontend data to the DB data structure
 def map_frontend_to_db(frontend_data: KoujyouReact):
     mapped_obj = Koujyou()
     mapped_obj.company_code = frontend_data.companyCode
@@ -212,3 +255,10 @@ def map_frontend_to_db(frontend_data: KoujyouReact):
     mapped_obj.hulftid = frontend_data.hulftid
 
     return mapped_obj
+
+# function for map the Frontend data to the DB data structure (Array)
+def map_frontend_arr_to_db(frontend_arr_data: []):
+    mapped_arr = []
+    for frontend_element in frontend_arr_data:
+        mapped_arr.append(map_frontend_to_db(frontend_element))
+    return mapped_arr
