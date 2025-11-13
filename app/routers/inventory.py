@@ -13,12 +13,29 @@ router = APIRouter(
     tags=["Inventory"]
 )
 
+columns = [
+    "company_code",
+    "previous_factory_code",
+    "product_factory_code",
+    "start_operation_date::text", # Add convertion for date in LIKE clause
+    "end_operation_date::text", # Add convertion for date in LIKE clause
+    "previous_factory_name",
+    "product_factory_name",
+    "material_department_code",
+    "environmental_information",
+    "authentication_flag",
+    "group_corporate_code",
+    "integration_pattern",
+    "hulftid"
+]
+
 @router.get("/record-list")
-def read_record_list(previousFactoryCode: str = "", productFactoryCode: str = ""):
+def read_record_list(previousFactoryCode: str = "", productFactoryCode: str = "", searchKeyword:str = ""):
 
     # transform params to Python Standards
     previous_factory_code = previousFactoryCode
     product_factory_code = productFactoryCode
+    search_keyword = searchKeyword
 
     conn = db_connection.get_connection()
     cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
@@ -27,12 +44,27 @@ def read_record_list(previousFactoryCode: str = "", productFactoryCode: str = ""
     # Query to Execute
     like_pattern_a= f"%{previous_factory_code}%"
     like_pattern_b = f"%{product_factory_code}%"
-    cur.execute("""SELECT * from m_koujyou 
-                    WHERE previous_factory_code LIKE %s AND product_factory_code LIKE %s 
-                    ORDER BY company_code, previous_factory_code, product_factory_code, start_operation_date, end_operation_date;""", (
-        like_pattern_a,
-        like_pattern_b
-    ))
+    like_pattern_c = f"%{search_keyword}%"
+
+    where_clause = f'WHERE previous_factory_code LIKE %s AND product_factory_code LIKE %s'
+    sql_params_tuple_a = (like_pattern_a, like_pattern_b)
+
+    # logic for modifing the where clause based on search_keyword
+    if search_keyword != "":
+        keyword_clause = " OR ".join([f"{col} LIKE %s" for col in columns])
+        where_clause = where_clause + f' AND ({keyword_clause})'
+        sql_params_tuple_b = tuple([like_pattern_c] * len(columns))
+        sql_params_tuple = sql_params_tuple_a + sql_params_tuple_b
+    else:
+        sql_params_tuple = sql_params_tuple_a
+
+
+    print(where_clause)
+    print(sql_params_tuple)
+    
+    cur.execute("SELECT * from m_koujyou " + where_clause + "ORDER BY company_code, previous_factory_code, product_factory_code, start_operation_date, end_operation_date;", 
+        sql_params_tuple            
+    )
     records = cur.fetchall()
 
     records_mapped = map_db_array(records)
@@ -262,7 +294,7 @@ def map_frontend_to_db(frontend_data: KoujyouReact):
     return mapped_obj
 
 # function for map the Frontend data to the DB data structure (Array)
-def map_frontend_arr_to_db(frontend_arr_data: []):
+def map_frontend_arr_to_db(frontend_arr_data):
     mapped_arr = []
     for frontend_element in frontend_arr_data:
         mapped_arr.append(map_frontend_to_db(frontend_element))

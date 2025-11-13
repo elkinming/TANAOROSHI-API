@@ -1,9 +1,10 @@
 from typing import Union
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-import random
-
 from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
+# Loader for .env file
+load_dotenv()
 
 from routers import inventory
 
@@ -22,17 +23,4 @@ app.add_middleware(
 
 # Routes Import
 app.include_router(inventory.router)
-
-# Function for getting the DB connection
-def get_connection():
-
-    db_config = {
-        "host": "localhost",
-        "port": 5432,
-        "dbname": "koujyou_db",
-        "user": "postgres",
-        "password": "Elkinpg1"
-    }
-
-    return psycopg2.connect(**db_config)
 
