@@ -14,6 +14,7 @@ class KoujyouReact(BaseModel):
   groupCorporateCode: str = ""
   integrationPattern: str = ""
   hulftid: str = ""
+  uuid: str = ""
 
 class Koujyou():
   company_code: str
@@ -29,3 +30,4 @@ class Koujyou():
   group_corporate_code: str
   integration_pattern: str
   hulftid: str
+  uuid: str
