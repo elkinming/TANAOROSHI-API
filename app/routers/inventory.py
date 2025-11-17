@@ -256,7 +256,6 @@ def insert_batch_record(koujyou_react_array: list[KoujyouReact]):
 def map_db_array(db_data):
 
     response_mapped = [{
-        "key": uuid.uuid4(),
         "companyCode": a, 
         "previousFactoryCode": b,
         "productFactoryCode": c,
@@ -270,7 +269,8 @@ def map_db_array(db_data):
         "groupCorporateCode": k,
         "integrationPattern": l,
         "hulftid": m,
-        } for a,b,c,d,e,f,g,h,i,j,k,l,m in db_data]
+        "uuid": n,
+        } for a,b,c,d,e,f,g,h,i,j,k,l,m,n in db_data]
     
     return response_mapped
 
