@@ -6,7 +6,9 @@ from fastapi.responses import JSONResponse
 from db import db_connection
 from models.koujyou import KoujyouReact, Koujyou
 from utils.utils import map_db_array, map_frontend_arr_to_db, map_frontend_to_db
-from services.inventory.update_batch_record import update_batch_record
+from services.inventory.update_multiple_records import update_multiple_records
+from services.inventory.insert_multiple_records import insert_multiple_records
+from services.inventory.delete_multiple_records import delete_multiple_records
 
 import uuid
 
@@ -252,7 +254,15 @@ def insert_batch_record(koujyou_react_array: list[KoujyouReact]):
         conn.close()
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=None)
 
-@router.put("/record-batch")
-def put_record_batch(koujyou_react_array: list[KoujyouReact]):
-    return update_batch_record(koujyou_react_array);
+@router.put("/record/multiple")
+def put_record_multiple(koujyou_react_array: list[KoujyouReact]):
+    return update_multiple_records(koujyou_react_array);
+
+@router.post("/record/multiple")
+def post_record_multiple(koujyou_react_array: list[KoujyouReact]):
+    return insert_multiple_records(koujyou_react_array);
+
+@router.delete("/record/multiple")
+def delete_record_multiple(koujyou_react_array: list[KoujyouReact]):
+    return delete_multiple_records(koujyou_react_array);
 

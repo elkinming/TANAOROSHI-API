@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
 class KoujyouReact(BaseModel):
-  companyCode: str
-  previousFactoryCode: str | int
-  productFactoryCode: str | int
-  startOperationDate: str
-  endOperationDate: str
+  companyCode: str = ""
+  previousFactoryCode: str | int  = ""
+  productFactoryCode: str | int  = ""
+  startOperationDate: str  = ""
+  endOperationDate: str  = ""
   previousFactoryName: str = ""
   productFactoryName: str = ""
   materialDepartmentCode: str = ""
@@ -14,7 +14,7 @@ class KoujyouReact(BaseModel):
   groupCorporateCode: str = ""
   integrationPattern: str = ""
   hulftid: str = ""
-  uuid: str = ""
+  id: str | int = ""
 
 class Koujyou():
   company_code: str
@@ -30,4 +30,4 @@ class Koujyou():
   group_corporate_code: str
   integration_pattern: str
   hulftid: str
-  uuid: str
+  id: str

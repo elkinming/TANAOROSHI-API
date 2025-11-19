@@ -18,10 +18,30 @@ def map_db_array(db_data):
         "groupCorporateCode": k,
         "integrationPattern": l,
         "hulftid": m,
-        "uuid": n,
-        } for a,b,c,d,e,f,g,h,i,j,k,l,m,n in db_data]
+        "id": index,
+        } for index, (a,b,c,d,e,f,g,h,i,j,k,l,m) in enumerate(db_data)]
     
     return response_mapped
+
+# function for map the DB data to the Frontend data structure
+def map_db_to_frontend(db_data: Koujyou):
+    mapped_obj = KoujyouReact()
+    mapped_obj.companyCode = db_data.company_code
+    mapped_obj.previousFactoryCode = db_data.previous_factory_code
+    mapped_obj.productFactoryCode = db_data.product_factory_code
+    mapped_obj.startOperationDate = db_data.start_operation_date
+    mapped_obj.endOperationDate = db_data.end_operation_date
+    mapped_obj.previousFactoryName = db_data.previous_factory_name
+    mapped_obj.productFactoryName = db_data.product_factory_name
+    mapped_obj.materialDepartmentCode = db_data.material_department_code
+    mapped_obj.environmentalInformation = db_data.environmental_information
+    mapped_obj.authenticationFlag = db_data.authentication_flag
+    mapped_obj.groupCorporateCode = db_data.group_corporate_code
+    mapped_obj.integrationPattern = db_data.integration_pattern
+    mapped_obj.hulftid = db_data.hulftid
+    mapped_obj.id = db_data.id
+
+    return mapped_obj
 
 # function for map the Frontend data to the DB data structure
 def map_frontend_to_db(frontend_data: KoujyouReact):
@@ -39,7 +59,7 @@ def map_frontend_to_db(frontend_data: KoujyouReact):
     mapped_obj.group_corporate_code = frontend_data.groupCorporateCode
     mapped_obj.integration_pattern = frontend_data.integrationPattern
     mapped_obj.hulftid = frontend_data.hulftid
-    mapped_obj.uuid = frontend_data.uuid
+    mapped_obj.id = frontend_data.id
 
     return mapped_obj
 
